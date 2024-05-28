@@ -1,0 +1,644 @@
+\documentclass{beamer}
+
+\usetheme{focus}
+% Add option [numbering=none] to disable the footer progress bar
+% Add option [numbering=fullbar] to show the footer progress bar as always full with a slide countx
+
+
+\definecolor{main}{RGB}{55, 135, 177}
+\definecolor{text}{RGB}{15, 40, 60}
+\definecolor{background}{RGB}{255, 255, 255}
+
+\setbeamertemplate{block begin}
+{
+  \par\vskip\medskipamount%
+  \IfStrEq{\insertblocktitle}{}{}{
+      \begin{beamercolorbox}[colsep*=.75ex]{block title}
+        \usebeamerfont*{block title}\insertblocktitle%
+      \end{beamercolorbox}%
+  }
+  {\parskip0pt\par}%
+  \ifbeamercolorempty[bg]{block title}
+  {}
+  {\ifbeamercolorempty[bg]{block body}{}{\nointerlineskip\vskip-0.5pt}}%
+  \usebeamerfont{block body}%
+  \begin{beamercolorbox}[colsep*=.75ex,vmode]{block body}%
+    \ifbeamercolorempty[bg]{block body}{\vskip-.25ex}{\vskip-.75ex}\vbox{}%
+}
+
+
+\setbeamercovered{transparent}
+
+%------------------------------------------------
+
+\usepackage{booktabs} % Required for better table rules
+\usepackage{xstring}
+\usepackage{tikz}
+\renewcommand{\baselinestretch}{1.3}
+\usepackage[T1]{fontenc}
+\usepackage[sfdefault]{AlegreyaSans}
+\usepackage{bussproofs}
+\EnableBpAbbreviations
+\usepackage{multicol}
+
+
+\title{Type Theory and $\lambda$-calculus}
+
+\author{Alireza Mahmoudian}
+
+\titlegraphic{\includegraphics[scale=.2]{res/ut-logo.png}}
+
+\institute{School of Mathematics,\\ Statistics and Computer Science\\ University of Tehran}
+
+\date{May 2024}
+
+
+\begin{document}
+
+
+\begin{frame}
+	\maketitle
+\end{frame}
+
+\def\secProg{A Very Simple Programming Language}
+\def\subDec{Short on Declarative Programming}
+\def\subLambda{Untyped $\lambda$-calculus}
+\def\secType{Enter the Type}
+\def\subSTLC{Introducing Simple Types}
+\def\subTypability{Typability}
+\def\secTruth{Back to Logic: Truth and Proof}
+\def\subTruth{What is called \emph{truth}?}
+\def\subBHK{The BHK Interpretation}
+\def\subIntLog{Intuitionistic Propositional Logic}
+\def\secDep{Beyond $0$-order Logic}
+\def\subDepFun{Dependent Function Type}
+
+\begin{frame}{Agenda}
+	\begin{enumerate}
+		\item \secProg
+		\begin{enumerate}
+			\item \subDec
+			\item \subLambda
+		\end{enumerate}
+		\item \secType
+		\begin{enumerate}
+			\item \subSTLC
+			\item \subTypability
+		\end{enumerate}
+		\item \secTruth
+		\begin{enumerate}
+			\item \subTruth
+			\item \subBHK
+			\item \subIntLog
+		\end{enumerate}
+		\item \secDep
+		\begin{enumerate}
+			\item \subDepFun
+		\end{enumerate}
+	\end{enumerate}
+\end{frame}
+
+\section{A Very Simple\\ Programming Language}
+
+\begin{frame}{\subDec}
+	Imperative programming language (like C, Java, Python \dots)
+	\begin{itemize}
+		\pause
+		\item Executes a sequence of commands
+		\pause
+		\item Transforming the state of the machine
+	\end{itemize}
+	
+	\pause
+	Declarative programming language (like Lisp, Haskell, \dots)
+	\begin{itemize}
+		\pause
+		\item Describes the logic of the program, not its control flow
+		\pause
+		\item The machine has not state
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{\subDec}
+	\begin{exampleblock}{Example}
+		\vspace{-1ex}
+		\begin{multicols}{2}
+			\texttt{int y = 0;}\\
+			\texttt{int x1 = 1;}\\
+			\texttt{int x2 = 2;}\\
+			\texttt{void f(int z) \{}\\
+				\quad \texttt{y = z + x2;}\\
+			\texttt{\}}\\
+			\texttt{void main() \{}\\
+				\quad \texttt{f(x1);}\\
+				\quad \texttt{print(y);}\\
+			\texttt{\}}
+			\columnbreak
+			\vfill
+			\[ (\lambda x_1^\mathbb{Z} x_2^\mathbb{Z}. (\lambda z^\mathbb{Z}. z + x_2) x_1) \; 1 \; 2 \]
+		\end{multicols}
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}[t]{\subLambda}
+	\begin{block}{The language $\Lambda$}
+		$\Lambda$ includes:
+		\begin{enumerate}
+			\item countably many variables: \quad $\{ x_1, x_2, \dots \} = V \;\subseteq\; \Lambda$
+			\pause
+			\item applications: \quad $(MN) \in \Lambda$, \quad for all $M, N \in \Lambda$
+			\item abstractions: \quad $(\lambda x. M) \in \Lambda$, \quad for all $x \in V$ and $M \in \Lambda$
+		\end{enumerate}
+		\vspace{1ex}
+	\end{block}
+	\pause
+	\begin{exampleblock}{Example}
+		\begin{itemize}
+			\item $x$ is just a $\lambda$-term.
+			\item $\lambda x. y$ is a function which returns the constant $\lambda$-term $y$.
+			\item $\lambda x. x$ is the identity function.
+		\end{itemize}
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}[t]{\subLambda}
+	$\lambda x. M$ is just a function which takes $x$ and returns $M$.
+	
+	\pause
+	Notice that $M$ is an arbitrary term, probably depending on $x$.
+	\pause
+	\begin{exampleblock}{Example}
+		\vspace{-1ex}
+		\begin{multicols}{2}
+			\texttt{def f(x):}\\
+				\quad \texttt{return x}
+			\columnbreak
+			\[ \lambda x. x \]
+		\end{multicols}
+		\pause
+		\begin{multicols}{2}
+			\texttt{def projection1(x, y):}\\
+				\quad \texttt{return x}
+			\columnbreak
+			\[ \lambda x y. x  \quad = \;  \lambda x. (\lambda y. x)\]
+		\end{multicols}
+		\pause
+		\begin{multicols}{2}
+			\texttt{def comp(f, g, x):}\\
+				\quad \texttt{return f(g(x))}
+			\columnbreak
+			\[ \lambda f g x. f (g x) \quad = \; \lambda f. (\lambda g. (\lambda x. f (g x))) \]
+		\end{multicols}
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}{\subLambda}
+	\begin{block}{Computation}
+		\[ \dots (\lambda x. M) N \dots \;\to_\beta\; \dots M [x := N] \dots \]
+		\pause
+		\begin{itemize}
+			\item $(\lambda x. M) N$ is called a \emph{redex}.
+			\pause
+			\item Transforming a redex, where ever in a term, is called a \emph{one-step $\beta$-reduction}.
+			\pause
+			\item A term without any redexes is in \emph{normal form}.
+		\end{itemize}
+		\vspace{1ex}
+	\end{block}
+\end{frame}
+
+\begin{frame}{\subLambda}
+	Names for some common terms: \; $I = \lambda x. x, \; K = \lambda x y. x$
+	\pause
+	\begin{exampleblock}{Example}
+		\begin{itemize}
+			\item $I y = (\lambda x. x) y \to_\beta y$
+			\pause
+			\item $K w z = (\lambda x y. x) w z \to_\beta w$
+			\pause
+			\item $K (I y) z \to_\beta K y z \to_\beta y$
+			\pause
+			\item $K (I y) z \to_\beta I y \to_\beta y$
+		\end{itemize}
+	\end{exampleblock}
+	\pause
+	There could be more than one way to reach a normal form, but all lead to one. \pause (Church-Rosser Property)
+
+\end{frame}
+
+\begin{frame}[t]{\subLambda}
+	Do all terms have a normal form?
+	\pause
+	\begin{exampleblock}{Example}
+		\begin{itemize}
+			\item $(\lambda x. x x)(\lambda x. x x) \to_\beta$ \pause $(\lambda x. x x)(\lambda x. x x) \to_\beta$ \pause $(\lambda x. x x)(\lambda x. x x) \to_\beta \dots$
+		\end{itemize}
+	\end{exampleblock}
+	\pause
+	This is a program that never halts.
+
+	\pause
+	\begin{block}{Can we write \emph{all} programs in $\Lambda$?}
+		Actually, we can construct all partially recursive functions in $\Lambda$.\\ So $\Lambda$ is a \emph{Turing-complete} programming language.
+	\end{block}
+	
+	\pause
+	But is it really ok to apply any term on any term?
+\end{frame}
+
+
+\section{\secType}
+
+\begin{frame}[t]{\subSTLC}
+	We can assign types to terms, so that every term is only applicable on the terms of the proper type.
+	\pause
+	This will reduce our expressivity.
+	\pause
+	\begin{block}{The language $\Lambda_\to$}
+		The set of types of $\Lambda_\to$, which is called $\mathbb{T}$ includes:
+		\begin{enumerate}
+			\item[4] countably many type variables: \quad $\{\alpha_1, \alpha_2, \dots\} = \mathbb{V} \;\subseteq\; \mathbb{T}$
+			\pause
+			\item[5] function types: \quad $\sigma \to \tau \in \mathbb{T}$, \quad for all $\sigma, \tau \in \mathbb{T}$
+		\end{enumerate}
+		\pause
+		We state that the term $M$ is of the type $\sigma$ by
+		\[M : \sigma\]
+	\end{block}
+	\pause
+	We want to let the term \; $M N$ \; to be \emph{typable}, only if \; $M : \sigma \to \tau$ \; and \; $N : \sigma$.
+\end{frame}
+
+\begin{frame}{\subSTLC}
+	\begin{exampleblock}{Example}
+		\begin{itemize}
+			\item $I_\sigma = \lambda x^\sigma . x : \sigma \to \sigma$
+			\pause
+			\item $K_{\sigma,\tau} = \lambda x^\sigma y^\tau. x : \sigma \to (\tau \to \sigma)$
+			\pause
+			\item $S_{\sigma,\tau,\delta} = \lambda \; g~^{\sigma \to (\tau \to \delta)} \; f~^{\sigma \to \tau} \; x~^\sigma. g x (f x) :$\\ \quad $(\sigma \to (\tau \to \delta)) \to ((\sigma \to \tau) \to (\sigma \to \delta))$
+		\end{itemize}
+	\end{exampleblock}
+	\pause
+	It is also possible to state type of a term in a specific \emph{context}.
+	
+	\pause
+	A \emph{context} is a sequence of typed term variables.
+	\[\Gamma = x_1^{\sigma_1}, x_2^{\sigma_2}, \dots, x_n^{\sigma_n}\]
+\end{frame}
+
+\begin{frame}[t]{\subTypability}
+	We define inductively what it means for a term $M$ to be typable of type $\sigma$, in a context $\Gamma$, denoted by $\Gamma \vdash M : \sigma$.
+	
+	\pause
+	First, we need to limit applications:
+	\begin{prooftree}
+		\AXC{$\Gamma \vdash M : \tau \to \sigma$}
+		\AXC{$\Gamma \vdash N : \sigma$}
+		\RightLabel{app}
+		\BIC{$\Gamma \vdash M N : \tau$}
+	\end{prooftree}
+	\pause
+	Second, we need to tell how to construct a function:
+	\begin{prooftree}
+		\AXC{$\Gamma, x^\sigma \vdash M : \tau$}
+		\RightLabel{abs}
+		\UIC{$\Gamma \vdash \lambda x^\sigma. M : \sigma \to \tau$}
+	\end{prooftree}
+	\pause
+	And at last, we need a basis for our inductive definition: $(x^\sigma \not \in \Gamma)$
+	\begin{prooftree}
+		\AXC{}
+		\RightLabel{var}
+		\UIC{$\Gamma, x^\sigma \vdash x : \sigma$}
+	\end{prooftree}
+\end{frame}
+
+\begin{frame}[t]{\subTypability}
+	\quad
+		{\small
+		\begin{prooftree}
+			\hspace*{-7mm}
+			\AXC{}
+			\RightLabel{var}
+			\UIC{$\Gamma \vdash g : \sigma \to (\tau \to \delta)$}
+			\AXC{}
+			\RightLabel{var}
+			\UIC{$\Gamma \vdash x : \sigma$}
+			\RightLabel{app}
+			\BIC{$\Gamma \vdash g x : \tau \to \delta$}
+			\AXC{}
+			\RightLabel{var}
+			\UIC{$\Gamma \vdash f : \sigma \to \tau$}
+			\AXC{}
+			\RightLabel{var}
+			\UIC{$\Gamma \vdash x : \sigma$}
+			\RightLabel{app}
+			\BIC{$\Gamma \vdash f x : \tau$}
+			\RightLabel{app}
+			\BIC{${\color{red} \Gamma = \quad} g~^{\sigma \to (\tau \to \delta)}, \; f~^{\sigma \to \tau}, \; x~^\sigma \; \vdash \; g x (f x) : \delta$}
+			\RightLabel{abs}
+			\UIC{$g~^{\sigma \to (\tau \to \delta)}, \; f~^{\sigma \to \tau} \; \vdash \; \lambda x~^\sigma. g x (f x) :\sigma \to \delta$}
+			\RightLabel{abs}
+			\UIC{$g~^{\sigma \to (\tau \to \delta)} \; \vdash \; \lambda f~^{\sigma \to \tau} \; x~^\sigma. g x (f x) : (\sigma \to \tau) \to (\sigma \to \delta)$}
+			\RightLabel{abs}
+			\UIC{$\vdash \lambda \; g~^{\sigma \to (\tau \to \delta)} \; f~^{\sigma \to \tau} \; x~^\sigma. g x (f x) : (\sigma \to (\tau \to \delta)) \to ((\sigma \to \tau) \to (\sigma \to \delta))$}
+		\end{prooftree}
+		}%\small
+		\vfill
+		\pause
+		Does this ring a bell?
+\end{frame}
+
+\section{\secTruth}
+
+\begin{frame}{\subTruth}
+	\begin{block}{Law of Excluded Middle}
+		\[ P \vee \neg P \]
+		\pause
+		Who would disagree? \pause Intuitionists!
+		\vspace{1ex}
+	\end{block}
+	\pause
+	But isn't evert statement either \emph{true} or \emph{not true}? \\
+	\pause
+	Depends on what do we mean by ``truth''.
+\end{frame}
+
+\begin{frame}[t]{\subTruth}
+Intuitionists believe that truth of a statement is a mental construction.
+
+\pause
+If we take everything either true or not true, we would lose data!
+
+\pause
+\begin{exampleblock}{Example}
+	\textit{Question.}\; Are there two irrationals $a$ and $b$ where $a^b$ is rational?
+
+	\textit{Answer.}\; Yes. We know that $\sqrt{2}^{\sqrt{2}}$ is either rational or irrational. In the first case, take $a = \sqrt{2}$ and $b = \sqrt{2}$. In the second case, take $a = \sqrt{2}^{\sqrt{2}}$ and $b = \sqrt{2}$.
+	\vspace{1ex}
+\end{exampleblock}
+
+\pause
+But what are $a$ and $b$ actually?
+\end{frame}
+
+
+\begin{frame}[t]{\subBHK}
+ \emph{The proof} of a statement is the construction that makes it true.
+
+\pause
+\begin{block}{The BHK Proof Interpretation}
+	A proof for
+	\begin{itemize}
+		\item $A \wedge B$ is a construction made of a proof  for $A$ and a proof for $B$.
+		\item $A \vee B$ is a construction made of a proof  for either of $A$ and $B$, and a way to tell which one.
+		\item $A \to B$ is a construction that takes any proof for $A$ and constructs a proof for $B$.
+		\item $\bot$ (the \emph{false} statement) is non existent!
+	\end{itemize}
+	$\neg A$ is just an abbreviation for $A \to \bot$.
+	\vspace{1ex}
+\end{block}
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	Recall that \emph{natural deduction} is designed so that it fulfils what the BHK interpretation expects of a proof:
+	{\footnotesize
+	\begin{prooftree}
+		\AXC{}
+		\RightLabel{$Id$}
+		\UIC{$\Gamma, \sigma \vdash \sigma$}
+		\AXC{$\Gamma \vdash \bot$}
+		\RightLabel{$\bot E$}
+		\UIC{$\Gamma \vdash \sigma$}
+		\noLine\BIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\AXC{$\Gamma , \sigma \vdash \tau$}
+		\RightLabel{$\to I$}
+		\UIC{$\Gamma \vdash \sigma \to \tau$}
+		\AXC{$\Gamma \vdash \sigma \to \tau$}
+		\AXC{$ \Gamma \vdash \sigma$}
+		\RightLabel{$\to E$}
+		\BIC{$\Gamma \vdash \tau$}
+		\noLine\BIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\AXC{$\Gamma \vdash \sigma$}
+		\AXC{$ \Gamma \vdash \tau$}
+		\RightLabel{$\wedge I$}
+		\BIC{$\Gamma \vdash \sigma \land \tau$}
+		\AXC{$\Gamma \vdash \sigma \land \tau$}
+		\RightLabel{$\wedge E _1$}
+		\UIC{$\Gamma \vdash \sigma$}
+		\AXC{$\Gamma \vdash \sigma \land \tau$}
+		\RightLabel{$\wedge E _2$}
+		\UIC{$\Gamma \vdash \tau$}
+		\noLine\TIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\AXC{$\Gamma \vdash \sigma$}
+		\RightLabel{$\vee I _1$}
+		\UIC{$\Gamma \vdash \sigma \lor \tau$}
+		\AXC{$\Gamma \vdash \tau$}
+		\RightLabel{$\vee I _2$}
+		\UIC{$\Gamma \vdash \sigma \lor \tau$}
+		\AXC{$\Gamma, \sigma\vdash \delta$}
+		\AXC{$ \Gamma, \tau \vdash \delta$}
+		\RightLabel{$\vee E$}
+		\BIC{$\Gamma, \sigma \vee \tau \vdash \delta$}
+		\noLine\TIC{}
+	\end{prooftree}
+	}%\footnotesize
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	Take the implicational fragment of the propositional logic.
+	\begin{block}{Natural Deduction for Implicational Fragment of Intuitionistic Logic}
+		{\small
+
+			\begin{prooftree}
+				\AXC{$\Gamma \vdash \sigma \to 
+				\sigma$}
+				\AXC{$\Gamma \vdash \sigma$}
+				\RightLabel{$\to E$}
+				\BIC{$\Gamma \vdash \tau$}
+
+				\AXC{$\Gamma, \sigma \vdash \tau$}
+				\RightLabel{$\to I$}
+				\UIC{$\Gamma \vdash \sigma \to \tau$}
+
+				\AXC{}
+				\RightLabel{$Id$}
+				\UIC{$\Gamma, \sigma \vdash \sigma$}
+				
+				\noLine\TIC{}
+			\end{prooftree}
+		}%\small
+	\end{block}
+	\pause
+	If we add the \emph{proof-terms} to this system, then \emph{provability} in implicational natural deduction would be just the same as \emph{typability} in $\Lambda_\to$.
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	$\lambda$-calculus and logic are essentially the same, modulo the proof-terms.
+
+	So we can see
+		\begin{center}
+			propositions as types, and\\
+			their proofs as the terms of their corresponding type.
+		\end{center}
+
+	This is called the \emph{Curry-Howard correspondence}.
+	\begin{block}{Typability Relation in $\Lambda_\to$}
+		{\footnotesize
+			\begin{prooftree}
+				\AXC{$\Gamma \vdash M : \sigma \to \tau$}
+				\AXC{$\Gamma \vdash N : \sigma$}
+				\RightLabel{app}
+				\BIC{$\Gamma \vdash M N : \tau$}
+
+				\AXC{$\Gamma, x^\sigma \vdash M : \tau$}
+				\RightLabel{abs}
+				\UIC{$\Gamma \vdash \lambda x^\sigma. M : \sigma \to \tau$}
+
+				\AXC{}
+				\UIC{$\Gamma, x^\sigma \vdash x : \sigma$}
+				
+				\noLine\TIC{}
+			\end{prooftree}
+		}%\small
+	\end{block}
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	Define the \emph{enriched} simply typed lambda calculus $\Lambda_{\text{IPC}}$ as follows:
+	{\footnotesize
+	\begin{prooftree}
+		\AXC{}
+		\RightLabel{var}
+		\UIC{$\Gamma, x^\sigma \vdash x : \sigma$}
+		\AXC{$\Gamma \vdash \text{contradiction} : \bot$}
+		\RightLabel{$\bot E$}
+		\UIC{$\Gamma \vdash M : \sigma$}
+		\noLine\BIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\AXC{$\Gamma, x^\sigma \vdash M : \tau$}
+		\RightLabel{$\to I$}
+		\UIC{$\Gamma \vdash \lambda x^\sigma . M : \sigma \to \tau$}
+		\AXC{$\Gamma \vdash M : \sigma \to \tau$}
+		\AXC{$ \Gamma \vdash N : \sigma$}
+		\RightLabel{$\to E$}
+		\BIC{$\Gamma \vdash M N : \tau$}
+		\noLine\BIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\AXC{$\Gamma \vdash M : \sigma$}
+		\AXC{$ \Gamma \vdash N : \tau$}
+		\RightLabel{$\wedge I$}
+		\BIC{$\Gamma \vdash \langle M, N \rangle : \sigma \land \tau$}
+		\AXC{$\Gamma \vdash M : \sigma \land \tau$}
+		\RightLabel{$\wedge E _1$}
+		\UIC{$\Gamma \vdash \pi_1(M) : \sigma$}
+		\AXC{$\Gamma \vdash M : \sigma \land \tau$}
+		\RightLabel{$\wedge E _2$}
+		\UIC{$\Gamma \vdash \pi_2(M) : \tau$}
+		\noLine\TIC{}
+	\end{prooftree}
+	\begin{prooftree}
+		\hspace*{-6mm}
+		\AXC{$\Gamma \vdash M : \sigma$}
+		\RightLabel{$\vee I _1$}
+		\UIC{$\Gamma \vdash \langle 0, M \rangle : \sigma \lor \tau$}
+		\AXC{$\Gamma \vdash M : \tau$}
+		\RightLabel{$\vee I _2$}
+		\UIC{$\Gamma \vdash \langle 1, M \rangle : \sigma \lor \tau$}
+		\AXC{$\Gamma, x^\sigma \vdash M : \delta$}
+		\AXC{$ \Gamma, y^\tau \vdash N : \delta$}
+		\RightLabel{$\vee E$}
+		\BIC{$\Gamma, z^{\sigma \vee \tau} \vdash \text{if} \; z \; \text{then} \; M \; \text{else} \; N : \delta$}
+		\noLine\TIC{}
+	\end{prooftree}
+	}%\footnotesize
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	So we are asked to prove something a $\lambda$-calculus, we can just code the proof!
+	\pause
+	\begin{exampleblock}{Example}
+		\emph{Question. }~ Prove $P \to P$ in $\Lambda_\text{IPC}$.\\
+		\pause
+		\emph{Answer. }~ $\lambda x^P . x : P \to P$, or the identity function over the type $P$, i.e. $I_P$.
+	\end{exampleblock}
+	\pause
+	\begin{exampleblock}{Example}
+		\emph{Question. }~ Prove $P \to (Q \to P)$ in $\Lambda_\text{IPC}$.\\
+		\pause
+		\emph{Answer. }~ $\lambda x^P y^Q . x : P \to (Q \to P)$, or the left projection function over the types $P$ and $Q$, i.e. $K_{P,Q}$.
+	\end{exampleblock}
+\end{frame}
+
+\begin{frame}{\subIntLog}
+	Recall that $\neg P$ is just $P \to \bot$.
+	\begin{exampleblock}{Example}
+		\emph{Question. }~ Prove $P \to \neg \neg P$ in $\Lambda_\text{IPC}$.\\
+		\pause
+		\emph{Answer. }\quad
+		\[ \lambda x^P f~^{P \to \bot} . f x : P \to ((P \to \bot) \to \bot) \]
+	\end{exampleblock}
+	\pause
+	But can we prove $\neg \neg P \to P$? Or $P \vee \neg P$?
+\end{frame}
+
+\begin{frame}{}
+	What else can be expressed in $\lambda$-calculus?
+\end{frame}
+
+\section{\secDep}
+
+\begin{frame}{\subDepFun}
+	Suppose we have a way to \emph{index} a family of types by another type.
+	
+	\pause
+	For example, let $\mathbb{N}$ be the type of \emph{natural numbers}. So $n : \mathbb{N}$ means that $n$ is a natural number. Now suppose $P$ is a family of types indexed by terms of $\mathbb{N}$.
+
+	\pause
+	Then w $P n$ states the claim that the 
+	\begin{block}{The BHK Interpretation, Revised}
+		A proof for
+		\begin{itemize}
+			\item $\forall x : A, B x$ is a construction which takes any term $x$ of $A$ to a proof for 
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}{\subDepFun}
+	\begin{block}{Dependent Type Theory}
+		\begin{prooftree}
+			\AXC{$\Gamma \vdash M : \forall x : A, B x$}
+			\AXC{$\Gamma \vdash N : A$}
+			\RightLabel{app}
+			\BIC{$\Gamma \vdash M N : B M$}
+
+			\AXC{$\Gamma, x^A \vdash M : B x$}
+			\RightLabel{abs}
+			\UIC{$\Gamma \vdash \lambda x^A. M : \forall x : A, B x$}
+			\noLine\BIC{}
+		\end{prooftree}
+	\end{block}
+
+	\pause
+	Notice that $A \to B$ is just $\forall \_ : A, B \_$.
+\end{frame}
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\begin{frame}[noframenumbering]{\quad}
+	\begin{center}
+		\Huge Thank you!
+	\end{center}
+\end{frame}
+
+\end{document}
