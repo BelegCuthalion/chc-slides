@@ -293,7 +293,7 @@
 	\pause
 	First, we need to limit applications:
 	\begin{prooftree}
-		\AXC{$\Gamma \vdash M : \tau \to \sigma$}
+		\AXC{$\Gamma \vdash M : \sigma \to \tau$}
 		\AXC{$\Gamma \vdash N : \sigma$}
 		\RightLabel{app}
 		\BIC{$\Gamma \vdash M N : \tau$}
@@ -459,7 +459,7 @@ But what are $a$ and $b$ actually?
 
 			\begin{prooftree}
 				\AXC{$\Gamma \vdash \sigma \to 
-				\sigma$}
+				\tau$}
 				\AXC{$\Gamma \vdash \sigma$}
 				\RightLabel{$\to E$}
 				\BIC{$\Gamma \vdash \tau$}
